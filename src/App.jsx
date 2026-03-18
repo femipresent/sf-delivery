@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { ProfileProvider, useProfile } from './context/ProfileContext';
+
 import ShipperLayout from './components/layout/ShipperLayout';
 import DriverLayout from './components/layout/DriverLayout';
 import DispatcherLayout from './components/layout/DispatcherLayout';
