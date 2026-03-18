@@ -1,15 +1,10 @@
 import React, { useState } from 'react';
 import { TruckIcon, UserGroupIcon, EnvelopeIcon, LockClosedIcon, PhoneIcon, BuildingOfficeIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../context/AuthContext';
-import { OTPAPI } from '../api/axios';
 
 const Register = ({ onRegisterSuccess, onBack }) => {
   const { signup } = useAuth();
   const [userType, setUserType] = useState(null);
-  const [otpStep, setOtpStep] = useState(false);
-  const [otp, setOtp] = useState('');
-  const [pendingUserType, setPendingUserType] = useState(null);
-  const [pendingData, setPendingData] = useState(null);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -58,71 +53,32 @@ const Register = ({ onRegisterSuccess, onBack }) => {
     }
 
     try {
-      // Send OTP to email first
-      await OTPAPI.post('/send-otp', { email: formData.email });
-      // Store pending data and show OTP step
-      setPendingUserType(userType);
-      setPendingData({
-        name: `${formData.firstName} ${formData.lastName}`,
+      const userData = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
         email: formData.email,
         password: formData.password,
         licenseNumber: formData.licenseNumber,
         vehicleInfo: formData.vehicleInfo,
-        ...formData
-      });
-      setOtpStep(true);
-    } catch (error) {
-      setError('Failed to send OTP. Please try again.');
-    }
-    setLoading(false);
-  };
+        phone: formData.phone,
+        businessName: formData.businessName
+      };
 
-  const handleVerifyOTP = async (e) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-
-    if (!otp.trim()) {
-      setError('Please enter the OTP sent to your email');
-      setLoading(false);
-      return;
-    }
-
-    try {
-      // Verify OTP
-      await OTPAPI.post('/verify-otp', { email: pendingData.email, otp });
-
-      // OTP verified - now create account
-      const result = await signup(pendingUserType, pendingData);
+      const result = await signup(userType, userData);
 
       if (result.success) {
-        onRegisterSuccess(pendingUserType, result.data);
+        onRegisterSuccess(userType, result.data);
       } else {
         setError(result.message || 'Registration failed. Please try again.');
       }
     } catch (error) {
-      setError(error.response?.data?.error || 'Invalid OTP. Please try again.');
-    }
-    setLoading(false);
-  };
-
-  const handleResendOTP = async () => {
-    setError('');
-    setLoading(true);
-    try {
-      await OTPAPI.post('/send-otp', { email: pendingData.email });
-      setError('');
-      alert('OTP resent successfully!');
-    } catch (error) {
-      setError('Failed to resend OTP. Please try again.');
+      setError(error.response?.data?.message || 'Registration failed. Please try again.');
     }
     setLoading(false);
   };
 
   const handleBack = () => {
     setUserType(null);
-    setOtpStep(false);
-    setOtp('');
     setError('');
     setFormData({
       firstName: '', lastName: '', email: '', phone: '',
@@ -130,85 +86,6 @@ const Register = ({ onRegisterSuccess, onBack }) => {
       address: '', licenseNumber: '', vehicleInfo: ''
     });
   };
-
-  // OTP Verification Screen
-  if (otpStep) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 flex items-center justify-center p-4">
-        <div className="w-full max-w-md">
-          <div className="text-center mb-8">
-            <div className="w-14 h-14 rounded-lg border-2 border-green-500 bg-white flex items-center justify-center mx-auto mb-4">
-              <EnvelopeIcon className="w-8 h-8 text-green-600" />
-            </div>
-            <h1 className="text-3xl font-bold text-gray-900">Verify Email</h1>
-            <p className="text-gray-600 mt-2">Enter the OTP sent to {pendingData?.email}</p>
-          </div>
-
-          <form onSubmit={handleVerifyOTP} className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
-            <div className="p-8">
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">Email Verification</h2>
-              <p className="text-sm text-gray-500 mb-6">Check your inbox for a 6-digit OTP code</p>
-
-              {error && (
-                <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start">
-                  <ExclamationCircleIcon className="w-5 h-5 text-red-600 mt-0.5 mr-3 flex-shrink-0" />
-                  <p className="text-sm text-red-800">{error}</p>
-                </div>
-              )}
-
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">OTP Code *</label>
-                <input
-                  type="text"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                  placeholder="Enter 6-digit OTP"
-                  maxLength={6}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-center text-2xl tracking-widest"
-                  disabled={loading}
-                  required
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-3 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white font-semibold rounded-lg flex items-center justify-center"
-              >
-                {loading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent mr-2"></div>
-                    Verifying...
-                  </>
-                ) : 'Verify & Create Account'}
-              </button>
-
-              <div className="mt-4 text-center">
-                <button
-                  type="button"
-                  onClick={handleResendOTP}
-                  disabled={loading}
-                  className="text-sm text-green-600 hover:text-green-700 font-medium"
-                >
-                  Didn't receive OTP? Resend
-                </button>
-              </div>
-            </div>
-
-            <div className="bg-gray-50 px-8 py-4 border-t border-gray-200 text-center">
-              <button
-                type="button"
-                onClick={() => setOtpStep(false)}
-                className="text-sm text-gray-500 hover:text-gray-700"
-              >
-                ← Back to Registration
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    );
-  }
 
   if (!userType) {
     return (
@@ -372,9 +249,9 @@ const Register = ({ onRegisterSuccess, onBack }) => {
               {loading ? (
                 <>
                   <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent mr-2"></div>
-                  Sending OTP...
+                  Creating Account...
                 </>
-              ) : 'Continue'}
+              ) : 'Create Account'}
             </button>
           </div>
 
