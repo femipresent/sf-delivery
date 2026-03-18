@@ -253,8 +253,6 @@ const ProfileAndSettings = ({ onLogout }) => {
             </div>
           )}
 
-          {/* Other tabs with mock removed - use profile data where possible */}
-          {/* Security, Notifications etc - simplified without mock state */}
           {activeTab === 'security' && (
             <div className="bg-white border border-gray-200 rounded-xl p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Security</h3>
@@ -270,5 +268,4 @@ const ProfileAndSettings = ({ onLogout }) => {
   );
 };
 
-// Real profile data - mock removed
-
+export default ProfileAndSettings;

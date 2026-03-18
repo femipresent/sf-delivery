@@ -1,13 +1,20 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
+import React from 'react'
+import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
-import { ProfileProvider } from './context/ProfileContext'
+import './index.css'
+import { AuthProvider } from './context/AuthContext.jsx'
+import { ThemeProvider } from './context/ThemeContext.jsx'
+import { ProfileProvider } from './context/ProfileContext.jsx'
 
-createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <ProfileProvider>
-      <App />
-    </ProfileProvider>
-  </StrictMode>,
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <ThemeProvider>
+      <AuthProvider>
+        <ProfileProvider>
+          <App />
+        </ProfileProvider>
+      </AuthProvider>
+    </ThemeProvider>
+  </React.StrictMode>,
 )
+
