@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 const Loader = ({ size = 'md', color = 'green' }) => {
   const sizeClasses = {
@@ -25,6 +25,104 @@ const PulseLoader = () => (
     <div className="h-2 w-2 bg-green-600 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
   </div>
 );
+
+const NIGERIA_ADDRESSES = [
+  { id: 1, address: '1 Lekki-Ikoyi Link Road, Lekki, Lagos', description: 'Lekki, Lagos State' },
+  { id: 2, address: '23 Admiralty Road, Lekki Phase 1, Lagos', description: 'Lekki Phase 1, Lagos State' },
+  { id: 3, address: '5 Banana Island, Ikoyi, Lagos', description: 'Banana Island, Lagos State' },
+  { id: 4, address: '12 Marina Drive, Lagos Island, Lagos', description: 'Marina, Lagos Island' },
+  { id: 5, address: '456 Victoria Island Road, VI, Lagos', description: 'Victoria Island, Lagos State' },
+  { id: 6, address: '78 Ikoyi Road, Ikoyi, Lagos', description: 'Ikoyi, Lagos State' },
+  { id: 7, address: '234 Awolowo Road, Ikoyi, Lagos', description: 'Ikoyi, Lagos State' },
+  { id: 8, address: '321 Bishop Oluwole Street, Victoria Island, Lagos', description: 'Victoria Island, Lagos' },
+  { id: 9, address: '234 Nnamdi Azikiwe Road, Ikeja, Lagos', description: 'Ikeja, Lagos State' },
+  { id: 10, address: '456 Allen Avenue, Ikeja, Lagos', description: 'Ikeja, Lagos State' },
+  { id: 11, address: '789 Opebi Road, Ikeja, Lagos', description: 'Opebi, Ikeja, Lagos' },
+  { id: 12, address: '111 Alagomeji Road, Yaba, Lagos', description: 'Yaba, Lagos State' },
+  { id: 13, address: '333 Balogun Street, Lagos Island, Lagos', description: 'Lagos Island, Lagos' },
+  { id: 14, address: '444 Broad Street, Lagos Island, Lagos', description: 'Lagos Island, Lagos State' },
+  { id: 15, address: '555 Apapa Wharf Road, Apapa, Lagos', description: 'Apapa, Lagos State' },
+  { id: 16, address: '999 Surulere Avenue, Surulere, Lagos', description: 'Surulere, Lagos State' },
+  { id: 17, address: '123 Cadastral Zone A02, Maitama, FCT Abuja', description: 'Maitama, FCT Abuja' },
+  { id: 18, address: '456 Kasumu Road, Wuse II, Abuja', description: 'Wuse II, FCT Abuja' },
+  { id: 19, address: '789 Gimbiya Road, Guzape, Abuja', description: 'Guzape, FCT Abuja' },
+  { id: 20, address: '654 Cadastral Zone B02, Asokoro, Abuja', description: 'Asokoro, FCT Abuja' },
+  { id: 21, address: '234 Jabi Road, Jabi, Abuja', description: 'Jabi, FCT Abuja' },
+  { id: 22, address: '111 Blantyre Street, Central Business District, Abuja', description: 'CBD, Abuja' },
+  { id: 23, address: '123 Port Harcourt Road, Old GRA, Port Harcourt', description: 'Old GRA, Port Harcourt' },
+  { id: 24, address: '456 Trans-Amadi Road, Port Harcourt', description: 'Trans-Amadi, Port Harcourt' },
+  { id: 25, address: '321 GRA Phase II, Port Harcourt', description: 'GRA Phase II, Port Harcourt' },
+  { id: 26, address: '123 Murtala Muhammad Way, GRA, Kano', description: 'GRA, Kano State' },
+  { id: 27, address: '456 Cairo Road, Kano', description: 'Cairo Road, Kano State' },
+  { id: 28, address: '123 Abeokuta Road, Ibadan, Oyo', description: 'Ibadan, Oyo State' },
+  { id: 29, address: '456 Queen Elizabeth Road, Ibadan', description: 'Ibadan, Oyo State' },
+  { id: 30, address: '123 Independence Layout, Enugu', description: 'Independence Layout, Enugu' },
+  { id: 31, address: '123 Sapele Road, Benin City', description: 'Sapele Road, Benin City' },
+  { id: 32, address: '123 Adiabata Street, Calabar', description: 'Calabar, Cross River' },
+];
+
+const AddressInput = ({ label, value, onChange, placeholder }) => {
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const timeoutRef = useRef(null);
+  const wrapperRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleChange = (e) => {
+    const val = e.target.value;
+    onChange(val);
+    clearTimeout(timeoutRef.current);
+    if (val.length < 2) { setSuggestions([]); setShowSuggestions(false); return; }
+    timeoutRef.current = setTimeout(() => {
+      const q = val.toLowerCase();
+      const filtered = NIGERIA_ADDRESSES.filter(a =>
+        a.address.toLowerCase().includes(q) || a.description.toLowerCase().includes(q)
+      ).slice(0, 6);
+      setSuggestions(filtered);
+      setShowSuggestions(true);
+    }, 250);
+  };
+
+  const handleSelect = (address) => {
+    onChange(address);
+    setSuggestions([]);
+    setShowSuggestions(false);
+  };
+
+  return (
+    <div ref={wrapperRef} className="relative">
+      <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+      <textarea
+        value={value}
+        onChange={handleChange}
+        onFocus={() => value.length >= 2 && suggestions.length > 0 && setShowSuggestions(true)}
+        placeholder={placeholder}
+        rows={3}
+        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none"
+      />
+      {showSuggestions && suggestions.length > 0 && (
+        <div className="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-56 overflow-y-auto">
+          {suggestions.map(s => (
+            <div key={s.id} onMouseDown={() => handleSelect(s.address)} className="px-4 py-3 hover:bg-green-50 cursor-pointer border-b border-gray-100 last:border-b-0">
+              <div className="font-medium text-gray-900 text-sm">{s.address}</div>
+              <div className="text-xs text-gray-500">{s.description}</div>
+            </div>
+          ))}
+        </div>
+      )}
+      <p className="text-xs text-gray-400 mt-1">Type to search or enter your full address</p>
+    </div>
+  );
+};
 
 const BookShipment = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -72,10 +170,7 @@ const BookShipment = () => {
     notes: ''
   });
 
-  const [addressSuggestions, setAddressSuggestions] = useState({
-    pickup: [],
-    delivery: []
-  });
+  const [addressSuggestions, setAddressSuggestions] = useState({ pickup: [], delivery: [] });
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const addressInputTimeout = useRef(null);
 
@@ -710,45 +805,12 @@ const BookShipment = () => {
               </div>
              
               <div className="space-y-3">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Pickup Address *</label>
-                  <div className="relative">
-                    <textarea
-                      value={shipmentData.pickupAddress}
-                      onChange={(e) => {
-                        handleInputChange('pickupAddress', e.target.value);
-                        getAddressSuggestions(e.target.value, 'pickup');
-                      }}
-                      placeholder="Start typing address... e.g., 123 Main St, Lagos"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                      rows="3"
-                      required
-                    />
-                    {loadingSuggestions && (
-                      <div className="absolute right-3 top-3">
-                        <Loader size="sm" color="green" />
-                      </div>
-                    )}
-                   
-                    {addressSuggestions.pickup.length > 0 && (
-                      <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                        {addressSuggestions.pickup.map(suggestion => (
-                          <div
-                            key={suggestion.id}
-                            onClick={() => selectAddressSuggestion('pickup', suggestion)}
-                            className="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
-                          >
-                            <div className="font-medium text-gray-900">{suggestion.address}</div>
-                            <div className="text-sm text-gray-500">{suggestion.description}</div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex items-center mt-1">
-                    <p className="text-xs text-gray-500">Start typing for address suggestions</p>
-                  </div>
-                </div>
+                <AddressInput
+                  label="Pickup Address *"
+                  value={shipmentData.pickupAddress}
+                  onChange={(val) => handleInputChange('pickupAddress', val)}
+                  placeholder="e.g., 123 Allen Avenue, Ikeja, Lagos"
+                />
               </div>
             </div>
 
@@ -761,45 +823,12 @@ const BookShipment = () => {
               </div>
              
               <div className="space-y-3">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Delivery Address *</label>
-                  <div className="relative">
-                    <textarea
-                      value={shipmentData.deliveryAddress}
-                      onChange={(e) => {
-                        handleInputChange('deliveryAddress', e.target.value);
-                        getAddressSuggestions(e.target.value, 'delivery');
-                      }}
-                      placeholder="Start typing address... e.g., 456 Market Rd, Abuja"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                      rows="3"
-                      required
-                    />
-                    {loadingSuggestions && (
-                      <div className="absolute right-3 top-3">
-                        <Loader size="sm" color="green" />
-                      </div>
-                    )}
-                   
-                    {addressSuggestions.delivery.length > 0 && (
-                      <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                        {addressSuggestions.delivery.map(suggestion => (
-                          <div
-                            key={suggestion.id}
-                            onClick={() => selectAddressSuggestion('delivery', suggestion)}
-                            className="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
-                          >
-                            <div className="font-medium text-gray-900">{suggestion.address}</div>
-                            <div className="text-sm text-gray-500">{suggestion.description}</div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex items-center mt-1">
-                    <p className="text-xs text-gray-500">Start typing for address suggestions</p>
-                  </div>
-                </div>
+                <AddressInput
+                  label="Delivery Address *"
+                  value={shipmentData.deliveryAddress}
+                  onChange={(val) => handleInputChange('deliveryAddress', val)}
+                  placeholder="e.g., 456 Wuse II, Abuja"
+                />
               </div>
             </div>
           </div>
