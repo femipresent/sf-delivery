@@ -14,7 +14,7 @@ export const ProfileProvider = ({ children }) => {
   const fetchProfile = async () => {
     try {
       setLoading(true);
-      const response = await API.get('/user/profile');
+      const response = await API.get('/register/profile');
       setProfile(response.data.data);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to load profile');
@@ -26,7 +26,7 @@ export const ProfileProvider = ({ children }) => {
 
   const updateProfile = async (updates) => {
     try {
-      const response = await API.put('/user/profile', updates);
+      const response = await API.put('/register/profile', updates);
       setProfile(response.data.data);
       return { success: true };
     } catch (err) {
@@ -35,7 +35,8 @@ export const ProfileProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    fetchProfile();
+    const storedUser = localStorage.getItem('sf_user');
+    if (storedUser) fetchProfile();
   }, []);
 
   const value = {
