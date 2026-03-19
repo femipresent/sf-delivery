@@ -170,6 +170,16 @@ const NotificationDropdown = ({ isOpen, notifications, onClose }) => {
 };
 
 // ==================== SHIPPER LAYOUT ====================
+const AvatarInitials = ({ name, size = 'sm' }) => {
+  const initials = name ? name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'U';
+  const sizeClass = size === 'sm' ? 'w-8 h-8 text-xs' : 'w-10 h-10 text-sm';
+  return (
+    <div className={`${sizeClass} rounded-full bg-green-600 flex items-center justify-center text-white font-bold`}>
+      {initials}
+    </div>
+  );
+};
+
 const ShipperLayout = ({ children, activeTab: externalActiveTab, setActiveTab: externalSetActiveTab, onLogout }) => {
   const { user } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -1289,13 +1299,7 @@ const ShipperLayout = ({ children, activeTab: externalActiveTab, setActiveTab: e
 
           <div className="p-4 border-t">
             <div className="flex items-center mb-3">
-              <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-green-500">
-                <img
-                  src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSaW9MRchAX63vAozkNFhsHbzLdxs0Q6Dh9cQUH8adk0g&s"
-                  alt="User Profile"
-                  className="w-full h-full object-cover"
-                />
-              </div>
+              <AvatarInitials name={user?.name} size="sm" />
               <div className="ml-3">
                 <p className="text-sm font-semibold text-gray-900">{user?.name || 'User'}</p>
                 <p className="text-xs text-gray-500">Shipper</p>
@@ -1350,13 +1354,7 @@ const ShipperLayout = ({ children, activeTab: externalActiveTab, setActiveTab: e
 
         <div className="p-4 border-t">
           <div className="flex items-center mb-3">
-            <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-green-500">
-              <img
-                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSaW9MRchAX63vAozkNFhsHbzLdxs0Q6Dh9cQUH8adk0g&s"
-                alt="User Profile"
-                className="w-full h-full object-cover"
-              />
-            </div>
+            <AvatarInitials name={user?.name} size="md" />
             <div className="ml-3">
               <p className="text-sm font-semibold text-gray-900">{user?.name || 'User'}</p>
               <p className="text-xs text-gray-500">Shipper</p>
@@ -1436,13 +1434,7 @@ const ShipperLayout = ({ children, activeTab: externalActiveTab, setActiveTab: e
                 onClick={() => setActiveTab('Profile & Settings')}
                 className="flex items-center space-x-2 p-1 hover:bg-gray-100 rounded-full"
               >
-                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full overflow-hidden border-2 border-green-500">
-                  <img
-                    src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSaW9MRchAX63vAozkNFhsHbzLdxs0Q6Dh9cQUH8adk0g&s"
-                    alt="User Profile"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
+                <AvatarInitials name={user?.name} size="sm" />
                 <div className="hidden md:block text-left">
                   <div className="text-sm font-semibold text-gray-900 truncate max-w-[120px]">{user?.name || 'User'}</div>
                   <div className="text-xs text-gray-500">Shipper</div>
