@@ -249,33 +249,32 @@ const ShipperLayout = ({ children, activeTab: externalActiveTab, setActiveTab: e
   const notifications = [
     {
       id: 1,
-      title: 'Welcome to FreightFlow!',
-      message: 'Thank you for choosing our logistics platform. You have 10 active shipments.',
+      title: `Welcome, ${user?.name || 'User'}!`,
+      message: `You have ${stats.totalShipments} shipment${stats.totalShipments !== 1 ? 's' : ''} on your account.`,
       time: 'Just now',
       type: 'success',
       icon: <EnvelopeIcon className="w-5 h-5" />,
       unread: true,
       action: 'View Dashboard'
     },
-    {
+    ...(stats.deliveredShipments > 0 ? [{
       id: 2,
-      title: '5 Shipments Delivered',
-      message: `${stats.deliveredShipments} shipments completed with proof of delivery.`,
+      title: `${stats.deliveredShipments} Shipment${stats.deliveredShipments !== 1 ? 's' : ''} Delivered`,
+      message: `${stats.deliveredShipments} shipment${stats.deliveredShipments !== 1 ? 's' : ''} completed with proof of delivery.`,
       time: 'Today',
       type: 'success',
       icon: <CheckCircleIcon className="w-5 h-5" />,
       unread: true
-    },
-    {
+    }] : []),
+    ...(stats.inTransitShipments > 0 ? [{
       id: 3,
-      title: '2 Packages Picked Up',
-      message: 'Company staff has picked up 2 shipments. Check pickup details.',
+      title: `${stats.inTransitShipments} Shipment${stats.inTransitShipments !== 1 ? 's' : ''} In Transit`,
+      message: `${stats.inTransitShipments} shipment${stats.inTransitShipments !== 1 ? 's' : ''} currently on the way.`,
       time: 'Today',
       type: 'info',
       icon: <TruckIcon className="w-5 h-5" />,
-      unread: true,
-      action: 'View Pickup Details'
-    }
+      unread: true
+    }] : [])
   ];
 
   const navigation = [
@@ -670,7 +669,7 @@ const ShipperLayout = ({ children, activeTab: externalActiveTab, setActiveTab: e
             <div>
               <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">Shipper Dashboard</h1>
               <div className="flex items-center">
-                <p className="text-xs sm:text-sm text-gray-600">Welcome back, Oluwafemi • {stats.totalShipments} Active Shipments</p>
+                <p className="text-xs sm:text-sm text-gray-600">Welcome back, {user?.name?.split(' ')[0] || 'User'} • {stats.totalShipments} Active Shipments</p>
               </div>
             </div>
             <div className="flex space-x-2 mt-3 sm:mt-0">
@@ -1298,8 +1297,8 @@ const ShipperLayout = ({ children, activeTab: externalActiveTab, setActiveTab: e
                 />
               </div>
               <div className="ml-3">
-                <p className="text-sm font-semibold text-gray-900">Oluwafemi Og.</p>
-                <p className="text-xs text-gray-500"> Shipper</p>
+                <p className="text-sm font-semibold text-gray-900">{user?.name || 'User'}</p>
+                <p className="text-xs text-gray-500">Shipper</p>
               </div>
             </div>
             <button
@@ -1359,8 +1358,8 @@ const ShipperLayout = ({ children, activeTab: externalActiveTab, setActiveTab: e
               />
             </div>
             <div className="ml-3">
-              <p className="text-sm font-semibold text-gray-900">Oluwafemi Og.</p>
-              <p className="text-xs text-gray-500"> Shipper</p>
+              <p className="text-sm font-semibold text-gray-900">{user?.name || 'User'}</p>
+              <p className="text-xs text-gray-500">Shipper</p>
             </div>
           </div>
           <button
@@ -1445,7 +1444,7 @@ const ShipperLayout = ({ children, activeTab: externalActiveTab, setActiveTab: e
                   />
                 </div>
                 <div className="hidden md:block text-left">
-                  <div className="text-sm font-semibold text-gray-900 truncate max-w-[120px]">Oluwafemi Og.</div>
+                  <div className="text-sm font-semibold text-gray-900 truncate max-w-[120px]">{user?.name || 'User'}</div>
                   <div className="text-xs text-gray-500">Shipper</div>
                 </div>
                 <ChevronRightIcon className="hidden sm:block w-4 h-4 text-gray-400" />
